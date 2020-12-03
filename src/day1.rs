@@ -2,8 +2,8 @@ use eyre::eyre;
 use itertools::Itertools;
 
 pub fn solve() -> eyre::Result<()> {
-    println!("{}", solve1()?);
-    println!("{}", solve2()?);
+    println!("day1.1: {}", solve1()?);
+    println!("day1.2: {}", solve2()?);
 
     Ok(())
 }

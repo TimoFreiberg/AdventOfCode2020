@@ -4,8 +4,8 @@ use std::str::pattern::Pattern;
 const INPUT: &str = include_str!("../input2.txt");
 
 pub fn solve() -> eyre::Result<()> {
-    println!("{}", solve1(INPUT));
-    println!("{}", solve2(INPUT));
+    println!("day2.1: {}", solve1(INPUT));
+    println!("day2.2: {}", solve2(INPUT));
     Ok(())
 }
 
