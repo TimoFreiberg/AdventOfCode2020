@@ -1,22 +1,32 @@
-use eyre::{bail, eyre};
+use eyre::eyre;
 use itertools::Itertools;
-use std::fs;
 
 pub fn solve() -> eyre::Result<()> {
-    let input = fs::read_to_string("input1.csv")?;
-
-    let lines = input
-        .lines()
-        .map(|it| it.parse::<i32>())
-        .collect::<Result<Vec<_>, _>>()?;
-
-    solve_for_combinations(&lines, 2)?;
-    solve_for_combinations(&lines, 3)?;
+    println!("{}", solve1()?);
+    println!("{}", solve2()?);
 
     Ok(())
 }
 
-fn solve_for_combinations(lines: &[i32], combinations: usize) -> eyre::Result<()> {
+const INPUT: &str = include_str!("../input1.csv");
+
+fn solve1() -> eyre::Result<i32> {
+    let lines = INPUT
+        .lines()
+        .map(|it| it.parse::<i32>())
+        .collect::<Result<Vec<_>, _>>()?;
+    solve_for_combinations(&lines, 2)
+}
+
+fn solve2() -> eyre::Result<i32> {
+    let lines = INPUT
+        .lines()
+        .map(|it| it.parse::<i32>())
+        .collect::<Result<Vec<_>, _>>()?;
+    solve_for_combinations(&lines, 3)
+}
+
+fn solve_for_combinations(lines: &[i32], combinations: usize) -> eyre::Result<i32> {
     let result: i32 = lines
         .into_iter()
         .combinations(combinations)
@@ -25,6 +35,16 @@ fn solve_for_combinations(lines: &[i32], combinations: usize) -> eyre::Result<()
         .iter()
         .copied()
         .product();
-    println!("{}", result);
-    Ok(())
+    Ok(result)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn day1() {
+        assert_eq!(solve1().unwrap(), 988771);
+        assert_eq!(solve2().unwrap(), 171933104);
+    }
 }
