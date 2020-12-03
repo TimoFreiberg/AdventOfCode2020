@@ -2,10 +2,12 @@
 
 mod day1;
 mod day2;
+mod day3;
 
 fn main() {
     day1::solve().unwrap();
     day2::solve().unwrap();
+    day3::solve().unwrap();
 }
 
 #[cfg(test)]
