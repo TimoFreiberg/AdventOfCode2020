@@ -17,6 +17,8 @@ dependencies = [
  "eyre",
  "itertools",
  "log",
+ "once_cell",
+ "regex",
 ]
 
 [[package]]

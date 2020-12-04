@@ -28,10 +28,10 @@ fn solve2() -> eyre::Result<i32> {
 
 fn solve_for_combinations(lines: &[i32], combinations: usize) -> eyre::Result<i32> {
     let result: i32 = lines
-        .into_iter()
+        .iter()
         .combinations(combinations)
         .find(|it| it.iter().copied().sum::<i32>() == 2020)
-        .ok_or(eyre!("no pair found"))?
+        .ok_or_else(|| eyre!("no pair found"))?
         .iter()
         .copied()
         .product();
