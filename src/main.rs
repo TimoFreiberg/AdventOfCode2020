@@ -7,6 +7,7 @@ mod day3;
 mod day4;
 mod day5;
 mod day6;
+mod day7;
 
 fn main() {
     day1::solve().unwrap();
@@ -15,6 +16,7 @@ fn main() {
     day4::solve().unwrap();
     day5::solve().unwrap();
     day6::solve().unwrap();
+    day7::solve().unwrap();
 }
 
 #[cfg(test)]
