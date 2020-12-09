@@ -74,26 +74,24 @@ impl Passport {
     }
 
     fn valid2(&self) -> bool {
-        let mut valid = true;
-        valid &= number_between(&self.byr, 1920, 2002);
-        valid &= number_between(&self.iyr, 2010, 2020);
-        valid &= number_between(&self.iyr, 2020, 2030);
-
-        static HEIGHT_RE: Lazy<Regex> =
-            Lazy::new(|| Regex::new("([0-9]{3}cm)|([0-9]{2}in)").unwrap());
-        valid &= regex_matches(&self.hgt, &*HEIGHT_RE);
-
         static HAIR_COLOR_RE: Lazy<Regex> = Lazy::new(|| Regex::new("#[0-9a-f]{6}").unwrap());
-        valid &= regex_matches(&self.hcl, &*HAIR_COLOR_RE);
 
-        valid &= ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"]
-            .iter()
-            .any(|it| Some(*it) == self.ecl.as_deref());
-
-        valid &= match &self.pid {
-            Some(pid) => pid.len() == 9 && pid.chars().all(|c| c.is_numeric()),
-            None => false,
-        };
+        let valid = [
+            number_between(self.byr.as_deref(), 1920, 2002),
+            number_between(self.iyr.as_deref(), 2010, 2020),
+            number_between(self.eyr.as_deref(), 2020, 2030),
+            valid_cm(self.hgt.as_deref()) || valid_inch(self.hgt.as_deref()),
+            regex_matches(self.hcl.as_deref(), &*HAIR_COLOR_RE),
+            ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"]
+                .iter()
+                .any(|it| Some(*it) == self.ecl.as_deref()),
+            match &self.pid {
+                Some(pid) => pid.len() == 9 && pid.chars().all(|c| c.is_numeric()),
+                None => false,
+            },
+        ]
+        .iter()
+        .all(|b| *b);
 
         debug!("{} {:?}", if valid { "Valid" } else { "Invalid" }, self);
 
@@ -101,15 +99,34 @@ impl Passport {
     }
 }
 
-fn number_between(byr: &Option<String>, min: u32, max: u32) -> bool {
+fn valid_cm(height: Option<&str>) -> bool {
+    let height = match height {
+        Some(it) => it,
+        None => return false,
+    };
+    static CM_RE: Lazy<Regex> = Lazy::new(|| Regex::new("[0-9]{3}cm").unwrap());
+    CM_RE.is_match(height) && number_between(Some(&height[..3]), 150, 193)
+}
+
+fn valid_inch(height: Option<&str>) -> bool {
+    let height = match height {
+        Some(it) => it,
+        None => return false,
+    };
+    static INCH_RE: Lazy<Regex> = Lazy::new(|| Regex::new("[0-9]{2}in").unwrap());
+    INCH_RE.is_match(height) && number_between(Some(&height[..2]), 59, 76)
+}
+
+fn number_between(num: Option<&str>, min: u32, max: u32) -> bool {
     let valid: Option<bool> = try {
-        let num: u32 = byr.as_ref()?.parse().ok()?;
+        let num: u32 = num.as_ref()?.parse().ok()?;
         num >= min && num <= max
     };
+    debug!("{:?} between {} and {}: {:?}", num, min, max, valid);
     valid.unwrap_or(false)
 }
 
-fn regex_matches(s: &Option<String>, regex: &Regex) -> bool {
+fn regex_matches(s: Option<&str>, regex: &Regex) -> bool {
     match s {
         Some(s) => regex.is_match(s),
         None => false,
@@ -119,6 +136,12 @@ fn regex_matches(s: &Option<String>, regex: &Regex) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn day4() {
+        assert_eq!(solve1(INPUT), 256);
+        assert_eq!(solve2(INPUT), 198);
+    }
 
     #[test]
     fn pt1_ex() {
@@ -141,7 +164,6 @@ iyr:2011 ecl:brn hgt:59in";
 
     #[test]
     fn pt2_ex_invalid() {
-        crate::tests::init_logger();
         let invalid = "eyr:1972 cid:100
 hcl:#18171d ecl:amb hgt:170 pid:186cm iyr:2018 byr:1926
 
@@ -161,7 +183,6 @@ pid:3556412378 byr:2007";
 
     #[test]
     fn pt2_ex_valid() {
-        crate::tests::init_logger();
         let valid = "pid:087499704 hgt:74in ecl:grn iyr:2012 eyr:2030 byr:1980
 hcl:#623a2f
 
